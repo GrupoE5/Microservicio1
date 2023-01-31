@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+    stages {
+        stage('checkout from github') {
+            steps {
+                git branch: 'Master',
+		        credentialsId: 'git',
+		        url: 'https://github.com/GrupoE5/Microservicio1.git'
+            }
+        }
+        
+        stage('Code Quality'){
+            steps {
+                script {
+                    def scannerHome = tool 'sonarqube';  //global tool configuration http://172.17.0.1:8080/configureTools/
+        			   withSonarQubeEnv("sonarqube-container") { //sonarqube server http://172.17.0.1:8080/configure
+        			   sh "${tool("sonarqube")}/bin/sonar-scanner\
+        							-Dsonar.projectKey=rest \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.language=java \
+                                    -Dsonar.sourceEncoding=UTF-8 \
+                                    -Dsonar.host.url=http://localhost:9000/projects \
+                                    -Dsonar.login=4c9aa12d5d3662872b446610c7891cc16f682a48"
+        				   }
+                }
+            }
+        }
+    }
+}
